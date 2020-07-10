@@ -21,6 +21,10 @@ Linear polarizer material (:monosp:`polarizer`)
  * - transmittance
    - |spectrum| or |texture|
    - Optional factor that can be used to modulate the specular transmission. (Default: 1.0)
+ * - polarizing
+   - |bool|
+   - Optional flag to disable polarization changes in order to use this as a neutral density filter,
+     even in polarized render modes. (Default: |true|, i.e. act as polarizer)
 
 This material simulates an ideal linear polarizer useful to test polarization aware
 light transport or to conduct virtual optical experiments. The aborbing axis of the
@@ -67,6 +71,7 @@ public:
     LinearPolarizer(const Properties &props) : Base(props) {
         m_theta = props.texture<Texture>("theta", 0.f);
         m_transmittance = props.texture<Texture>("transmittance", 1.f);
+        m_polarizing = props.bool_("polarizing", true);
 
         m_flags = BSDFFlags::FrontSide | BSDFFlags::BackSide | BSDFFlags::Null;
         ek::set_attr(this, "flags", m_flags);
@@ -88,6 +93,10 @@ public:
         UnpolarizedSpectrum transmittance = m_transmittance->eval(si, active);
 
         if constexpr (is_polarized_v<Spectrum>) {
+            if (!m_polarizing) {
+                return { bs, mueller::absorber(0.5f*transmittance) };
+            }
+
             // Query rotation angle
             UnpolarizedSpectrum theta = ek::deg_to_rad(m_theta->eval(si, active));
 
@@ -136,6 +145,10 @@ public:
 
         UnpolarizedSpectrum transmittance = m_transmittance->eval(si, active);
         if constexpr (is_polarized_v<Spectrum>) {
+            if (!m_polarizing) {
+                return mueller::absorber(0.5f*transmittance);
+            }
+
             // Query rotation angle
             UnpolarizedSpectrum theta = ek::deg_to_rad(m_theta->eval(si, active));
 
@@ -179,12 +192,14 @@ public:
         oss << "LinearPolarizer[" << std::endl
             << "  theta = " << string::indent(m_theta) << std::endl
             << "  transmittance = " << string::indent(m_transmittance) << std::endl
+            << "  polarizing = " << m_polarizing << std::endl
             << "]";
         return oss.str();
     }
 
     MTS_DECLARE_CLASS()
 private:
+    bool m_polarizing;
     ref<Texture> m_theta;
     ref<Texture> m_transmittance;
 };
