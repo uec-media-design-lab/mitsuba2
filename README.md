@@ -135,8 +135,8 @@ sudo apt install -y python3-pytest python3-pytest-xdist python3-numpy
 sudo apt install -y python3-sphinx python3-guzzle-sphinx-theme python3-sphinxcontrib.bibtex
 ```
 
-Next, ensure that two environment variables CC and CXX are exported. You can either run these two commands manually before using CMake or—even better—add them to your ~/.bashrc file. This ensures that CMake will always use the correct compiler.
-CC、CXXの環境変数を変更する。~/.bashrcに以下のコマンドを追記することで、terminal起動時に必ず環境変数設定が実行される。zshなどのbashではないシェルを使っている場合はシェルに合わせて変更する(.zshrcなど)。
+Next, ensure that two environment variables CC and CXX are exported. You can either run these two commands manually before using CMake or—even better—add them to your `~/.bashrc` file. This ensures that CMake will always use the correct compiler.
+CC、CXXの環境変数を変更する。`~/.bashrc` に以下のコマンドを追記することで、terminal起動時に必ず環境変数設定が実行される。zshなどのbashではないシェルを使っている場合はシェルに合わせて変更する(.zshrcなど)。
 
 ```
 export CC=clang-9
