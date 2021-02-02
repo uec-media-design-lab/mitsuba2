@@ -101,7 +101,7 @@ cd <..mitsuba repository..>
 cp resources/mitsuba.conf.template mitsuba.conf
 ```
 `mitsuba.conf` を開いて、好みのvariants(`gpu_rgb`, `gpu_autodiff_rgb`, etc...)を追記する。
-```json
+```
 "enabled": [
     # The "scalar_rgb" variant *must* be included at the moment.
     "scalar_rgb",
