@@ -83,6 +83,109 @@ several other noteworthy changes:
 Please see the [documentation](http://mitsuba2.readthedocs.org/en/latest) for
 details on how to compile, use, and extend Mitsuba 2.
 
+## Clone
+
+```
+git clone --recursive https://github.com/uec-media-design-lab/mitsuba2.git
+cd mitsuba2
+git submodule update --init --recursive
+```
+
+## Choosing variants
+variantsを変更したり、追加してmitsuba2のアプリケーション（偏光レンダリング、微分可能レンダリング）を利用できる。
+[Variants list](https://mitsuba2.readthedocs.io/en/latest/src/getting_started/variants.html)
+
+### How to add and/or modify variants
+```
+cd <..mitsuba repository..>
+cp resources/mitsuba.conf.template mitsuba.conf
+```
+`mitsuba.conf` を開いて、好みのvariants(`gpu_rgb`, `gpu_autodiff_rgb`, etc...)を追記する。
+```json
+"enabled": [
+    # The "scalar_rgb" variant *must* be included at the moment.
+    "scalar_rgb",
+    "scalar_spectral",
+    "gpu_rgb",          # Add
+    "gpu_autodiff_rgb"  # Add
+],
+```
+
+## Compile
+### Linux
+Clangや必要なモジュールを以下のコマンドでインストールする。
+```
+# Install recent versions build tools, including Clang and libc++ (Clang's C++ library)
+sudo apt install -y clang-9 libc++-9-dev libc++abi-9-dev cmake ninja-build
+
+# Install libraries for image I/O and the graphical user interface
+sudo apt install -y libz-dev libpng-dev libjpeg-dev libxrandr-dev libxinerama-dev libxcursor-dev
+
+# Install required Python packages
+sudo apt install -y python3-dev python3-distutils python3-setuptools
+```
+
+テストやHTMLドキュメントを生成するためには追加のパッケージが必要(see [Developer guide](https://mitsuba2.readthedocs.io/en/latest/src/developer_guide/intro.html#sec-devguide))。以下のコマンドでインストール。
+
+```
+# For running tests
+sudo apt install -y python3-pytest python3-pytest-xdist python3-numpy
+
+# For generating the documentation
+sudo apt install -y python3-sphinx python3-guzzle-sphinx-theme python3-sphinxcontrib.bibtex
+```
+
+Next, ensure that two environment variables CC and CXX are exported. You can either run these two commands manually before using CMake or—even better—add them to your ~/.bashrc file. This ensures that CMake will always use the correct compiler.
+CC、CXXの環境変数を変更する。~/.bashrcに以下のコマンドを追記することで、terminal起動時に必ず環境変数設定が実行される。zshなどのbashではないシェルを使っている場合はシェルに合わせて変更する(.zshrcなど)。
+
+```
+export CC=clang-9
+export CXX=clang++-9
+```
+コンパイルは以下コマンド。
+
+```
+# Create a directory where build products are stored
+cd <..mitsuba repository..>
+mkdir build
+cd build
+cmake -GNinja ..
+ninja
+```
+
+### Windows
+- 必要環境
+   - Visual Studio 2019.
+   - git 
+   - CMake
+   - Python (Anacondaの利用を進めます。少なくとも木内の環境では、Anacondaを使わないとコンパイル後にPythonから `import mitsuba` としても、Pythonがmitsubaを認識してくれませんでした。Anaconda promptで実行したところ、うまく動作することを確認しています。
+
+```
+# To be safe, explicitly ask for the 64 bit version of Visual Studio
+mkdir build
+cd build
+cmake .. -G "Visual Studio 16 2019" -A x64
+```
+
+Afterwards, open the generated mitsuba.sln file and proceed building as usual from within Visual Studio. You will probably also want to set the build mode to Release there.
+buildディレクトリ下に`mitsuba.sln`が生成されるので、Visual Studioで開く。Releaseビルドを選択して、タブから`ソリューションのビルド`を実行。
+
+または、[`msbuild`](https://docs.microsoft.com/en-us/cpp/build/walkthrough-using-msbuild-to-create-a-visual-cpp-project?redirectedfrom=MSDN&view=msvc-160) を利用する。
+
+[VC 2017のIDE上から64bitのcl.exeを使う](https://ameblo.jp/michirushiina/entry-12277257163.html)に記載のように、コンパイルに使用するメモリが2GBを超えると、「ヒープの領域を使い果たしました。」みたいなエラーが出ることがある。
+原因はIDEが32bitアプリで、コンパイルも32bit版が走るかららしい。
+`msbuild`を利用すると、64bitコンパイルで指定ができるので、上記エラーがでない&コマンドラインから実行ができるので便利。
+
+:warning: MSBuild.exeへの環境変数は通す必要あり。
+```
+C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\MSBuild\<バージョン(16.0など)>\Bin\MSBuild.exe
+```
+
+```
+msbuild mitsuba.sln /p:configuration=release /p:platform=x64 /p:PreferredToolArchitecture=x64
+```
+
+
 ## About
 
 This project was created by [Wenzel Jakob](http://rgl.epfl.ch/people/wjakob).
