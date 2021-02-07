@@ -357,4 +357,21 @@ Float fresnel_diffuse_reflectance(Float eta) {
     return result;
 }
 
+/** 
+ * \brief Retro transmission in local coordinates.
+ */
+template <typename Float>
+Vector<Float, 3> retro_transmit(const Vector<Float, 3> &wi) {
+    return Vector<Float, 3>(wi.x(), wi.y(), -wi.z());
+}
+
+/**
+ * \brief Retro transmission wi w.r.t a given surface normal.
+ */
+template <typename Float>
+Vector<Float, 3> retro_transmit(const Vector<Float, 3> &wi, const Normal<Float, 3> &m)
+{
+    return fmadd(Vector<Float, 3>(m), 2.f * dot(wi, m), -wi);
+}
+
 NAMESPACE_END(mitsuba)

@@ -1,0 +1,112 @@
+<scene version="2.2.0">
+    <default name="spp" value="256"/>
+    <default name="res" value="512"/>
+    <default name="max_depth" value="6"/>
+
+    <!-- <integrator type="direct"/> -->
+    <integrator type="path">
+        <integer name="max_depth" value="$max_depth"/>
+        <integer name="samples_per_pass" value="4"/>
+    </integrator>
+
+    <sensor type="perspective">
+        <string name="fov_axis" value="smaller"/>
+        <float name="near_clip" value="10"/>
+        <float name="far_clip" value="2800"/>
+        <float name="focus_distance" value="1000"/>
+        <float name="fov" value="40"/>
+        <transform name="to_world">
+            <lookat origin="0, 0, 190"
+                    target="0, 0, 0"
+                    up    ="  0,   1,    0"/>
+        </transform>
+        <sampler type="independent">  <!-- ldsampler -->
+            <integer name="sample_count" value="$spp"/>
+        </sampler>
+        <film type="hdrfilm">
+            <integer name="width" value="$res"/>
+            <integer name="height" value="$res"/>
+            <rfilter type="box"/>
+            <string name="pixel_format" value="rgb"/>
+        </film>
+    </sensor>
+
+    <bsdf type="twosided" id="white">
+        <bsdf type="diffuse">
+            <rgb name="reflectance" value="0.8, 0.8, 0.8"/>
+        </bsdf>
+    </bsdf>
+
+    <bsdf type="twosided" id="red">
+        <bsdf type="diffuse">
+            <rgb name="reflectance" value="0.8, 0.05, 0.05"/>
+        </bsdf>
+    </bsdf>
+
+    <bsdf type="twosided" id="green">
+        <bsdf type="diffuse">
+            <rgb name="reflectance" value="0.05, 0.8, 0.05"/>
+        </bsdf>
+    </bsdf>
+
+    <!-- Ceiling -->
+    <shape type="rectangle">
+        <transform name="to_world">
+            <scale value="50"/>
+            <rotate x="1" angle="90"/>
+            <translate value="0, 50, 0"/>
+        </transform>
+        <ref id="white"/>
+    </shape>
+
+    <!-- Floor -->
+    <shape type="rectangle">
+        <transform name="to_world">
+            <scale value="50"/>
+            <rotate x="1" angle="90"/>
+            <translate value="0, -50, 0"/>
+        </transform>
+        <ref id="white"/>
+    </shape>
+
+    <!-- Back -->
+    <shape type="rectangle">
+        <transform name="to_world">
+            <scale value="50"/>
+            <translate value="0, 0, -50"/>
+        </transform>
+        <ref id="white"/>
+    </shape>
+
+    <!-- Right wall -->
+    <shape type="rectangle">
+        <transform name="to_world">
+            <scale value="50"/>
+            <rotate y="1" angle="90"/>
+            <translate value="-50, 0, 0"/>
+        </transform>
+        <ref id="green"/>
+    </shape>
+
+    <!-- Left wall -->
+    <shape type="rectangle">
+        <transform name="to_world">
+            <scale value="50"/>
+            <rotate y="1" angle="90"/>
+            <translate value="50, 0, 0"/>
+        </transform>
+        <ref id="red"/>
+    </shape>
+
+    <!-- Ceiling light -->
+    <shape type="rectangle">
+        <transform name="to_world">
+            <scale value="12.5"/>
+            <rotate x="1" angle="90"/>
+            <translate value="0, 49.9, 0"/>
+        </transform>
+        <emitter type="area">
+            <spectrum name="radiance" value="400:0, 500:8, 600:15.6, 700:18.4"/>
+        </emitter>
+    </shape>
+</scene>

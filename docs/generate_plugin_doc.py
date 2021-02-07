@@ -31,7 +31,10 @@ BSDF_ORDERING = ['diffuse',
                  'blendbsdf',
                  'mask',
                  'twosided',
-                 'null']
+                 'null',
+                 # Original bsdf to extend infloasion
+                 'mmaps',       
+                 'absorber']
 
 EMITTER_ORDERING = ['area',
                     'point',
