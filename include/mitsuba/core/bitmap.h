@@ -292,6 +292,9 @@ public:
     /// Specify whether the bitmap uses an sRGB gamma encoding
     void set_srgb_gamma(bool value);
 
+    /// \brief Setter to store a spectrum at specified coordinate. 
+    void set(const Spectrum &spectrum, Vector2u coord);
+
     /// Return whether the bitmap uses premultiplied alpha
     bool premultiplied_alpha() const { return m_premultiplied_alpha; }
 

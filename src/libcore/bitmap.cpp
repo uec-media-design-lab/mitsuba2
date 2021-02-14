@@ -1089,7 +1089,7 @@ void Bitmap::read_openexr(Stream *stream) {
     Imath::Box2i data_window = file.header().dataWindow();
     m_size = Vector2u(data_window.max.x - data_window.min.x + 1,
                       data_window.max.y - data_window.min.y + 1);
-
+    
     // Compute pixel / row strides
     size_t pixel_stride = bytes_per_pixel(),
            row_stride = pixel_stride * m_size.x(),
