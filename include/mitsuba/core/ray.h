@@ -34,7 +34,7 @@ template <typename Point_, typename Spectrum_> struct Ray {
     Float maxt = math::Infinity<Float>;   ///< Maximum position on the ray segment
     Float time = 0.f;                     ///< Time value associated with this ray
     Wavelength wavelengths;               ///< Wavelength packet associated with the ray
-    Spectrum spectrum;                    ///< Spctrum to propagate the radiance from view to scene 
+    // Spectrum spectrum;                 ///< MEDIALAB: Spctrum to propagate the radiance from view to scene 
 
     /// Construct a new ray (o, d) at time 'time'
     Ray(const Point &o, const Vector &d, Float time,
@@ -59,11 +59,12 @@ template <typename Point_, typename Spectrum_> struct Ray {
         : o(r.o), d(r.d), d_rcp(r.d_rcp), mint(mint), maxt(maxt),
           time(r.time), wavelengths(r.wavelengths) { }
 
-    /// Construct a new ray (o, d) with spectrum 'spectrum'
-    Ray(const Point &o, const Vector &d, Float time,
-        const Spectrum &spectrum) 
-        : o(o), d(d), d_rcp(rcp(d)), time(time),
-          spectrum(spectrum) {}
+    /** MEDIALAB:
+     *  Construct a new ray (o, d) with spectrum */
+    // Ray(const Point &o, const Vector &d, Float time,
+    //     const Spectrum &spectrum) 
+    //     : o(o), d(d), d_rcp(rcp(d)), time(time),
+    //       spectrum(spectrum) {}
 
     /// Update the reciprocal ray directions after changing 'd'
     void update() { d_rcp = rcp(d); }
@@ -81,7 +82,7 @@ template <typename Point_, typename Spectrum_> struct Ray {
         result.maxt        = maxt;
         result.time        = time;
         result.wavelengths = wavelengths;
-        result.spectrum    = spectrum;
+        // result.spectrum    = spectrum; /// MEDIALAB:
         return result;
     }
 

@@ -136,6 +136,7 @@ sudo apt install -y python3-sphinx python3-guzzle-sphinx-theme python3-sphinxcon
 ```
 
 Next, ensure that two environment variables CC and CXX are exported. You can either run these two commands manually before using CMake or—even better—add them to your `~/.bashrc` file. This ensures that CMake will always use the correct compiler.
+
 CC、CXXの環境変数を変更する。`~/.bashrc` に以下のコマンドを追記することで、terminal起動時に必ず環境変数設定が実行される。zshなどのbashではないシェルを使っている場合はシェルに合わせて変更する(.zshrcなど)。
 
 ```
@@ -168,6 +169,7 @@ cmake .. -G "Visual Studio 16 2019" -A x64
 ```
 
 Afterwards, open the generated mitsuba.sln file and proceed building as usual from within Visual Studio. You will probably also want to set the build mode to Release there.
+
 buildディレクトリ下に`mitsuba.sln`が生成されるので、Visual Studioで開く。Releaseビルドを選択して、タブから`ソリューションのビルド`を実行。
 
 または、[`msbuild`](https://docs.microsoft.com/en-us/cpp/build/walkthrough-using-msbuild-to-create-a-visual-cpp-project?redirectedfrom=MSDN&view=msvc-160) を利用する。

@@ -49,6 +49,10 @@
         </bsdf>
     </bsdf>
 
+    <bsdf type="mmapsbsdf" id="mmaps">
+        <rgb name="retro_transmittance" value="1,1,1"/>
+    </bsdf>
+
     <!-- Ceiling -->
     <shape type="rectangle">
         <transform name="to_world">
@@ -107,6 +111,25 @@
         </transform>
         <emitter type="area">
             <spectrum name="radiance" value="400:0, 500:8, 600:15.6, 700:18.4"/>
+        </emitter>
+    </shape>
+
+    <shape type="rectangle">
+        <transform name="to_world">
+            <scale value="25"/>
+            <rotate x="1" angle="-45"/>
+        </transform>
+        <ref id="mmaps"/>
+    </shape>
+
+    <shape type="rectangle">
+        <transform name="to_world">
+            <scale value="5"/>
+            <rotate x="1" angle="-90"/>
+            <translate value="0, -20, 0"/>
+        </transform>
+        <emitter type="area">
+            <spectrum name="radiance" value="400:1, 500:0, 600:0, 700:0"/>
         </emitter>
     </shape>
 </scene>

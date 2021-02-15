@@ -14,8 +14,8 @@ public:
     MTS_IMPORT_TYPES(Texture)
 
     MMAPs(const Properties &props) : Base(props) {
-        m_flags = BSDFFlags::DeltaTransmission;
-        m_components.push_back(m_flags)
+        m_flags = BSDFFlags::DeltaTransmission | BSDFFlags::FrontSide | BSDFFlags::BackSide;
+        m_components.push_back(m_flags);
 
         m_retro_transmittance = props.texture<Texture>("retro_transmittance", 1.f);
 
@@ -25,7 +25,7 @@ public:
             if (material != "none")
                 Throw("Should specify eta or material not both.");
         } else {
-            m_eta = props.string("eta", "none");
+            m_eta = props.texture<Texture>("eta", 1.f);
         }
     }
 
@@ -37,6 +37,7 @@ public:
         MTS_MASKED_FUNCTION(ProfilerPhase::BSDFSample, active);
 
         Float cos_theta_i = Frame3f::cos_theta(si.wi);
+        active &= cos_theta_i > 0;
 
         BSDFSample3f bs = zero<BSDFSample3f>();
         Spectrum value(0.f);

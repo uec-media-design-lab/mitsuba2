@@ -14,9 +14,9 @@ def split_header_format(filename):
     return header, file_format
 
 xmlfile = input("XML file that describes the scene: ")
+imgfile = input("Filename of output image file: ")
 
-filename = 'xml/{}'.format(xmlfile)
-outname = split_header_format(xmlfile)[0]
+filename = 'xml/{}.xml'.format(xmlfile)
 
 Thread.thread().file_resolver().append(os.path.dirname(filename))
 
@@ -25,11 +25,11 @@ scene.integrator().render(scene, scene.sensors()[0])
 
 film = scene.sensors()[0].film()
 
-film.set_destination_file('outputs/{}.exr'.format(outname))
+film.set_destination_file('outputs/{}.exr'.format(imgfile))
 film.develop()
 
 bmp = film.bitmap(raw=True)
-bmp.convert(Bitmap.PixelFormat.RGB, Struct.Type.UInt8, srgb_gamma=True).write('outputs/{}.jpg'.format(outname))
+bmp.convert(Bitmap.PixelFormat.RGB, Struct.Type.UInt8, srgb_gamma=True).write('outputs/{}.jpg'.format(imgfile))
 
 bmp_linear_rgb = bmp.convert(Bitmap.PixelFormat.RGB, Struct.Type.Float32, srgb_gamma=True)
 image_np = np.array(bmp_linear_rgb)
