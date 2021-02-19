@@ -41,6 +41,10 @@ public:
     /// Perform the main rendering job. Returns \c true upon success
     virtual bool render(Scene *scene, Sensor *sensor) = 0;
 
+    /** MEMO: by Shunji Kiuchi
+     *  Backward rendering that propagates spectrums on film to scene. */
+    virtual bool invert_render(Scene *scene, Sensor *sensor, const Bitmap* ideal_result) = 0;
+
     /**
      * \brief Cancel a running render job
      *
@@ -131,6 +135,10 @@ public:
 
     bool render(Scene *scene, Sensor *sensor) override;
     void cancel() override;
+    
+    /** MEMO: by Shunji Kiuchi
+     *  Backward rendering that propagates spectrums on film to scene. */
+    bool invert_render(Scene* scene, Sensor *sensor, const Bitmap* ideal_result) override;
 
     /**
      * Indicates whether \ref cancel() or a timeout have occured. Should be

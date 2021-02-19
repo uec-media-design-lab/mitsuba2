@@ -179,6 +179,59 @@ MTS_VARIANT bool SamplingIntegrator<Float, Spectrum>::render(Scene *scene, Senso
     return !m_stop;
 }
 
+MTS_VARIANT bool SamplingIntegrator<Float, Spectrum>::invert_render(
+    Scene *scene, Sensor *sensor, const Bitmap* ideal_result
+) {
+    ScopedPhase sp(ProfilerPhase::Render);
+    m_stop = false;
+
+    auto result_size = ScalarVector2i(ideal_result->width(), ideal_result->height());
+
+    size_t total_spp = sensor->sampler()->sample_count();
+    size_t samples_per_pass = (m_samples_per_pass == (size_t) - 1)
+                              ? total_spp : std::min((size_t) m_samples_per_pass, total_spp);
+
+    if((total_spp % samples_per_pass) != 0) 
+        Throw("sample_count (%d) must be a multiple of samples_per_pass (%d).",
+              total_spp, samples_per_pass);
+    
+    size_t n_passes = (total_spp + samples_per_pass - 1) / samples_per_pass;
+
+    std::vector<std::string> channels = aov_names();
+    bool has_aovs = !channels.empty();
+
+    m_render_timer.reset();
+    /** MEMO: by Shunji Kiuchi
+     *  If rendering is performed by CPU, 
+     *  the procedure inside of this `if` statement will be performed. */
+    if constexpr (!is_cuda_array_v<Float>) {
+        /// Render on the CPU using a spiral pattern 
+        size_t n_threads = __global_thread_count;
+        Log(Info, "Starting render job (%ix%i, %i sample%s, %s %i thread%s)",
+            result_size.x(), result_size.y(),
+            total_spp, total_spp == 1 ? "" : "s",,
+            n_passes > 1 ? tfm::format(" %d passes,", n_passes) : "",
+            n_threads, n_threads == 1 ? "" : "s");
+        
+        if (m_timeout > 0.f)
+            Log(Info, "Timeout specified: %.2f seconds.", m_timeout);
+
+        // Find a good block size to use for splitting up the total workload.
+        if (m_block_size == 0) {
+            uint32_t block_size = MTS_BLOCK_SIZE;
+            while (true) {
+                if (block_size == 1 || hprod((film_size + block_size - 1) / block_size) >= n_threads)
+                    break;
+                block_size /= 2;
+            }
+            m_block_size = block_size;
+        }
+
+        
+    }
+    
+}
+
 MTS_VARIANT void SamplingIntegrator<Float, Spectrum>::render_block(const Scene *scene,
                                                                    const Sensor *sensor,
                                                                    Sampler *sampler,

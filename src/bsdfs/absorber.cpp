@@ -14,7 +14,7 @@ public:
     MTS_IMPORT_TYPES(Texture)
 
     Absorber(const Properties &props) : Base(props) {
-
+        
         m_components.push_back(m_flags);
     }
 
