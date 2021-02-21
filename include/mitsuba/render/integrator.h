@@ -41,7 +41,7 @@ public:
     /// Perform the main rendering job. Returns \c true upon success
     virtual bool render(Scene *scene, Sensor *sensor) = 0;
 
-    /** MEMO: by Shunji Kiuchi
+    /** MEDIALAB: 
      *  Backward rendering that propagates spectrums on film to scene. */
     virtual bool invert_render(Scene *scene, Sensor *sensor, const Bitmap* ideal_result) = 0;
 
@@ -136,7 +136,7 @@ public:
     bool render(Scene *scene, Sensor *sensor) override;
     void cancel() override;
     
-    /** MEMO: by Shunji Kiuchi
+    /** MEDIALAB: 
      *  Backward rendering that propagates spectrums on film to scene. */
     bool invert_render(Scene* scene, Sensor *sensor, const Bitmap* ideal_result) override;
 

@@ -185,7 +185,15 @@ MTS_VARIANT bool SamplingIntegrator<Float, Spectrum>::invert_render(
     ScopedPhase sp(ProfilerPhase::Render);
     m_stop = false;
 
+    ref<Film> film = sensor->film();
+    ScalarVector2i film_size = film->crop_size();
+
     auto result_size = ScalarVector2i(ideal_result->width(), ideal_result->height());
+
+    /** MEDIALAB:
+     *  Add a validation to ensure that the dimensions of film and ideal_result are equal. */
+    if (film_size != result_size) 
+        Throw("The dimensions of film and ideal_result are not equal.");
 
     size_t total_spp = sensor->sampler()->sample_count();
     size_t samples_per_pass = (m_samples_per_pass == (size_t) - 1)
@@ -201,9 +209,8 @@ MTS_VARIANT bool SamplingIntegrator<Float, Spectrum>::invert_render(
     bool has_aovs = !channels.empty();
 
     m_render_timer.reset();
-    /** MEMO: by Shunji Kiuchi
-     *  If rendering is performed by CPU, 
-     *  the procedure inside of this `if` statement will be performed. */
+    /** MEDIALAB:
+     *  This condition is for CPU computation. */
     if constexpr (!is_cuda_array_v<Float>) {
         /// Render on the CPU using a spiral pattern 
         size_t n_threads = __global_thread_count;
@@ -227,8 +234,83 @@ MTS_VARIANT bool SamplingIntegrator<Float, Spectrum>::invert_render(
             m_block_size = block_size;
         }
 
+        Spiral spiral(film, m_block_size, n_passes);
+
+        ThreadEnvironment env;
+        ref<ProgressReporter> progress = new ProgressReporter("Rendering");
+        std::mutex mutex;
+
+        // Total number of blocks to be handled, including multiple passes.
+        size_t total_blocks = spiral.block_count() * n_passes,
+               block_done = 0;
         
+        tbb::parallel_for(
+            tbb::blocked_range<size_t>(0, total_blocks, 1),
+            [&](const tbb::blocked_range<size_t> &range) {
+                ScopedSetThreadEnvironment set_env(env);
+                ref<Sampler> sampler = sensor->sampler()->clone();
+                ref<ImageBlock> block = new ImageBlock(m_block_size, channels.size(), 
+                                                       film->reconstruction_filter(),
+                                                       !has_aovs);
+                scoped_flush_denormals flush_denormals(true);
+                std::unique_ptr<Float[]> aovs(new Float[channles.size()]);
+
+                // For each block
+                for (auto i = range.begin(); i != range.end() && !should_stop(); ++i) {
+                    auto [offset, size, block_id] = spiral.next_block();
+                    Assert(hprod(size) != 0);
+                    block->set_size(size);
+                    block->set_offset(offset);
+
+                    render_block(scene, sensor, sampler, block,
+                                 aovs.get(), samples_per_pass, block_id);
+                    
+                    film->put(block);
+
+                    /* Critical section: update progress bar */ {
+                        std::lock_guard<std::mutex> lock(mutex);
+                        block_done++;
+                        progress->update(blocks_done / (ScalarFloat) total_blocks);
+                    }
+                }
+                                                
+            }
+        );
+    } else { // For GPU computation
+        Log(Info, "Start rendering...");
+
+        ref<Sampler> sampler = sensor->sampler();
+        sampler->set_samples_per_wavefront((uint32_t) samples_per_pass);
+
+        ScalarFloat diff_scale_factor = rsqrt((ScalarFloat) sampler->sample_count());
+        ScalarUInt32 wavefront_size = hprod(film_size) * (uint32_t) samples_per_pass;
+        if (sampler->wavefront_size() != wavefront_size)
+            sampler->seed(0, wavefront_size);
+
+        UInt32 idx = arange<UInt32>(wavefront_size);
+        if (samples_per_pass != 1)
+            idx /= (uint32_t) samples_per_pass;
+        
+        ref<ImageBlock> block = new ImageBlock(film_size, channels.size(),
+                                               film->reconstruction_filter(),
+                                               !has_aovs);
+        block->clear();
+        block->set_offset(sensor->film()->crop_offset());
+
+        Vector2f pos = Vector2f(Float(idx % uint32_t(film_size[0])),
+                                Float(idx / uint32_t(film_size[0])));
+        pos += block->offset();
+
+        std::vector<Float> aovs(channels.size());
+
+        for (size_t i = 0; i < n_passes; i++)
+            render_sample(scene, sensor, sampler, block, aovs.data(),
+                          pos, diff_scalar_factor);
+        
+        film->put(block);
     }
+
+
     
 }
 
@@ -309,6 +391,8 @@ SamplingIntegrator<Float, Spectrum>::render_sample(const Scene *scene,
         (position_sample - sensor->film()->crop_offset()) /
         sensor->film()->crop_size();
 
+    /** MEDIALAB:
+     *  Ray object have to store the spectral information to propagate it to the scene. */
     auto [ray, ray_weight] = sensor->sample_ray_differential(
         time, wavelength_sample, adjusted_position, aperture_sample);
 

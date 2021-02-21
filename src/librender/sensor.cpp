@@ -56,6 +56,9 @@ MTS_VARIANT Sensor<Float, Spectrum>::Sensor(const Properties &props) : Base(prop
 
 MTS_VARIANT Sensor<Float, Spectrum>::~Sensor() {}
 
+/** MEDIALAB: 
+ *  Rays must have the spectrum information in their structure.
+ * */
 MTS_VARIANT std::pair<typename Sensor<Float, Spectrum>::RayDifferential3f, Spectrum>
 Sensor<Float, Spectrum>::sample_ray_differential(Float time, Float sample1, const Point2f &sample2,
                                                  const Point2f &sample3, Mask active) const {
