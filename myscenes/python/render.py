@@ -18,10 +18,17 @@ def print_time(elapsed_time):
     ms = f
     print("Rendering time: {}h {}m {}s {:.2f}ms".format(h, m, s, ms))
 
+<<<<<<< HEAD
 xmlname = sys.argv[1]
 img_name = sys.argv[2]
 
 filename = "xml/{}.xml".format(xmlname)
+=======
+xmlfile = input("XML file that describes the scene: ")
+imgfile = input("Filename of output image file: ")
+
+filename = 'xml/{}.xml'.format(xmlfile)
+>>>>>>> 56368d212de5c5a09b7a23fcdafe6c7a54fe1f5b
 
 # Add the scene directory to the FileResolver's search path
 Thread.thread().file_resolver().append(os.path.dirname(filename))
@@ -50,13 +57,21 @@ print_time(elapsed_time)
 # After rendering, the rendered data is stored in the file
 film = scene.sensors()[0].film()
 
+<<<<<<< HEAD
 # Write out rendering as high dynamic range OpenEXR file
 film.set_destination_file('outputs/{}.exr'.format(img_name))
+=======
+film.set_destination_file('outputs/{}.exr'.format(imgfile))
+>>>>>>> 56368d212de5c5a09b7a23fcdafe6c7a54fe1f5b
 film.develop()
 
 # Write out a tonemapped JPG of the same rendering
 bmp = film.bitmap(raw=True)
+<<<<<<< HEAD
 bmp.convert(Bitmap.PixelFormat.RGB, Struct.Type.UInt8, srgb_gamma=True).write('outputs/{}.jpg'.format(img_name))
+=======
+bmp.convert(Bitmap.PixelFormat.RGB, Struct.Type.UInt8, srgb_gamma=True).write('outputs/{}.jpg'.format(imgfile))
+>>>>>>> 56368d212de5c5a09b7a23fcdafe6c7a54fe1f5b
 
 # Get linear pixel values as a numpy array for further processing
 bmp_linear_rgb = bmp.convert(Bitmap.PixelFormat.RGB, Struct.Type.Float32, srgb_gamma=False)
