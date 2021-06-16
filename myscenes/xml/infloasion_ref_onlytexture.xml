@@ -1,0 +1,53 @@
+<scene version="2.2.0">
+    <default name="spp" value="1024"/>
+    <default name="state" value="target"/>
+    <default name="max_depth" value="24"/>
+    <default name="resx" value="1280"/>
+    <default name="resy" value="720"/>
+    <default name="texturename" value="../img/uv_brightness1.0.jpg"/>
+
+    <integrator type="path">
+        <integer name="max_depth" value="$max_depth"/>
+        <integer name="rr_depth" value="8"/>
+        <integer name="samples_per_pass" value="16"/>
+    </integrator>
+
+    <!-- Sensor configuration -->
+    <sensor type="perspective">
+		<string name="fov_axis" value="x"/>
+		<float name="fov" value="39.6"/>
+
+		<float name="focus_distance" value="1000"/>
+        <transform name="to_world">
+			<lookat origin="0, 0, 100"
+					target="0, 0, 40"
+					up="0, 1, 0"/>
+        </transform>
+		<float name="near_clip" value="0.01"/>
+		<float name="far_clip" value="4000"/>
+        <film type="hdrfilm">
+            <string name="pixel_format" value="rgb"/>
+            <integer name="width" value="$resx"/>
+            <integer name="height" value="$resy"/>
+            <rfilter type="box"/>
+        </film>
+        <sampler type="independent">
+			<integer name="sample_count" value="128"/>
+        </sampler>
+    </sensor>
+
+    <!-- Textured light source (directly placed at plane-symmetry position -->
+    <shape type="obj" id="textured_lightsource_ref">
+        <string name="filename" value="meshes/simple_plane.obj"/>
+        <transform name="to_world">
+            <scale value="1"/>
+            <rotate x="1" angle="-90"/>
+            <translate value="0.0, 0.0, 40"/>
+        </transform>
+        <emitter type="area">
+            <texture name="radiance" type="bitmap">
+                <string name="filename" value="$texturename"/>
+            </texture>
+        </emitter>
+    </shape>
+</scene>

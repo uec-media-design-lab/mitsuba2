@@ -1,0 +1,118 @@
+<scene version="2.2.0">
+    <default name="spp" value="1024"/>
+    <default name="state" value="target"/>
+    <default name="max_depth" value="24"/>
+    <default name="resx" value="720"/>
+    <default name="resy" value="720"/>
+
+    <integrator type="path">
+        <integer name="max_depth" value="$max_depth"/>
+        <integer name="rr_depth" value="8"/>
+        <integer name="samples_per_pass" value="16"/>
+    </integrator>
+
+    <!-- Sensor configuration -->
+    <sensor type="perspective">
+		<string name="fov_axis" value="x"/>
+		<float name="fov" value="10"/>
+
+		<float name="focus_distance" value="1000"/>
+        <transform name="to_world">
+			<lookat origin="0, 0, 100"
+					target="0, 0, 0"
+					up="0, 1, 0"/>
+        </transform>
+		<float name="near_clip" value="0.01"/>
+		<float name="far_clip" value="4000"/>
+        <film type="hdrfilm">
+            <string name="pixel_format" value="rgb"/>
+            <integer name="width" value="$resx"/>
+            <integer name="height" value="$resy"/>
+            <rfilter type="box"/>
+        </film>
+        <sampler type="independent">
+			<integer name="sample_count" value="$spp"/>
+        </sampler>
+    </sensor>
+
+    <include filename="cornel.xml"/>
+
+    <!-- Materials -->
+    <!-- Glass material for MMAPs -->
+    <bsdf type="dielectric" id="MMAPs_Glass">
+        <float name="int_ior" value="1.52"/>
+    </bsdf> 
+    <!-- Mirror material for MMAPs -->
+    <bsdf type="twosided" id="MMAPs_Mirror">
+        <bsdf type="conductor">
+            <rgb name="eta" value="0.87, 0.87, 0.87"/>
+            <rgb name="k" value="0.87, 0.87, 0.87"/>
+        </bsdf>
+    </bsdf>
+    <!-- Glass material for Bunny -->
+    <bsdf type="dielectric" id="ObjGlass">
+        <!-- 1.49 is IOR of acrylic -->
+        <float name="int_ior" value="1.49"/>
+    </bsdf>
+
+    <!-- Textured light source -->
+    <shape type="obj" id="textured_lightsource">
+        <string name="filename" value="meshes/simple_plane.obj"/>
+        <transform name="to_world">
+            <scale value="1.0"/>
+            <rotate x="1" angle="180"/>
+            <translate value="0.0, -40, 0.0"/>
+        </transform>
+        <emitter type="area">
+            <texture name="radiance" type="bitmap">
+                <string name="filename" value="../img/uv_brightness1.0.jpg"/>
+            </texture>
+            <float name="intensity" value="10.0"/>
+        </emitter>
+    </shape>
+
+    <!-- MMAPs (mirror) -->
+    <shape type="obj">
+        <string name="filename" value="meshes/mmaps_mirror.obj"/>
+        <transform name="to_world">
+            <rotate x="1" angle="45"/>
+        </transform>
+        <ref id="MMAPs_Mirror"/>
+    </shape>
+
+    <!-- MMAPs (glass) -->
+    <shape type="obj">
+        <string name="filename" value="meshes/mmaps_glass.obj"/>
+        <transform name="to_world">
+            <rotate x="1" angle="45"/>
+        </transform>
+        <ref id="MMAPs_Glass"/>
+    </shape>
+
+    <!-- Transparent object -->
+    <!-- <shape type="obj">
+        <string name="filename" value="meshes/bunny.obj"/>
+        <transform name="to_world">
+            <scale value="70"/>
+            <translate value="0, -5, 40"/>
+        </transform>
+        <ref id="ObjGlass"/>
+    </shape> -->
+
+    <!-- <shape type="obj">
+        <string name="filename" value="meshes/3Dprint/teapot_body_3dprint.obj"/>
+        <transform name="to_world">
+            <scale value="1"/>
+            <translate value="0, -1, 40"/>
+        </transform>
+        <ref id="ObjGlass"/>
+    </shape> -->
+
+    <shape type="sphere">
+        <float name="radius" value="2.5"/>
+        <transform name="to_world">
+            <translate value="0, 0, 40"/>
+        </transform>
+        <ref id="ObjGlass"/>
+    </shape>
+</scene>

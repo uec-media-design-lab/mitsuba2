@@ -1,0 +1,78 @@
+<scene version="2.2.0">
+    <default name="spp" value="1024"/>
+    <default name="state" value="target"/>
+    <default name="max_depth" value="24"/>
+    <default name="resx" value="720"/>
+    <default name="resy" value="720"/>
+
+    <integrator type="path">
+        <integer name="max_depth" value="$max_depth"/>
+        <integer name="rr_depth" value="8"/>
+        <integer name="samples_per_pass" value="16"/>
+    </integrator>
+
+    <!-- Sensor configuration -->
+    <sensor type="perspective">
+		<string name="fov_axis" value="x"/>
+		<float name="fov" value="50"/>
+
+		<float name="focus_distance" value="1000"/>
+        <transform name="to_world">
+			<lookat origin="0, 0, 70"
+					target="0, 0, 35.6"
+					up="0, 1, 0"/>
+        </transform>
+		<float name="near_clip" value="0.01"/>
+		<float name="far_clip" value="4000"/>
+        <film type="hdrfilm">
+            <string name="pixel_format" value="rgb"/>
+            <integer name="width" value="$resx"/>
+            <integer name="height" value="$resy"/>
+            <rfilter type="box"/>
+        </film>
+        <sampler type="independent">
+			<integer name="sample_count" value="$spp"/>
+        </sampler>
+    </sensor>
+
+    <!-- Materials -->
+    <!-- Glass material for MMAPs -->
+    <bsdf type="dielectric" id="MMAPs_Glass">
+        <float name="int_ior" value="1.52"/>
+    </bsdf> 
+    <!-- Mirror material for MMAPs -->
+    <bsdf type="twosided" id="MMAPs_Mirror">
+        <bsdf type="conductor">
+            <rgb name="eta" value="1.0, 1.0, 1.0"/>
+            <rgb name="k" value="1.0, 1.0, 1.0"/>
+        </bsdf>
+    </bsdf>
+    <!-- Glass material for Bunny -->
+    <bsdf type="dielectric" id="Bunny_Glass">
+        <float name="int_ior" value="1.49"/>
+    </bsdf>
+    <!-- Reflective material for mirror -->
+    <bsdf type="twosided" id="MirrorMat">
+        <bsdf type="conductor">
+            <rgb name="eta" value="1.0, 1.0, 1.0"/>
+            <rgb name="k" value="1.0, 1.0, 1.0"/>
+        </bsdf>
+    </bsdf>
+    <!-- Lambert material for debug -->
+    <bsdf type="twosided" id="Debug_lambert">
+        <bsdf type="diffuse">
+            <rgb name="reflectance" value="0.8, 0.8, 0.8"/>
+        </bsdf>
+    </bsdf>
+
+    <include filename="cornel.xml"/>
+
+    <shape type="obj">
+        <string name="filename" value="meshes/uv_bunny.obj"/>
+        <transform name="to_world">
+            <scale value="70"/>
+            <translate value="0, 0, 0"/>
+        </transform>
+        <ref id="Bunny_Glass"/>
+    </shape>
+</scene>

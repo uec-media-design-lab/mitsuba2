@@ -1,0 +1,127 @@
+<scene version="2.2.0">
+    <default name="spp" value="1024"/>
+    <default name="state" value="target"/>
+    <default name="max_depth" value="24"/>
+    <default name="resx" value="768"/>
+    <default name="resy" value="768"/>
+
+    <integrator type="path">
+        <integer name="max_depth" value="$max_depth"/>
+        <integer name="rr_depth" value="8"/>
+        <integer name="samples_per_pass" value="16"/>
+    </integrator>
+
+    <!-- Sensor configuration -->
+    <sensor type="perspective">
+		<string name="fov_axis" value="x"/>
+		<float name="fov" value="10"/>
+
+		<float name="focus_distance" value="1000"/>
+        <transform name="to_world">
+			<lookat origin="0, 0, 100"
+					target="0, 0, 0"
+					up="0, 1, 0"/>
+        </transform>
+		<float name="near_clip" value="0.01"/>
+		<float name="far_clip" value="4000"/>
+        <film type="hdrfilm">
+            <string name="pixel_format" value="rgb"/>
+            <integer name="width" value="$resx"/>
+            <integer name="height" value="$resy"/>
+            <rfilter type="box"/>
+        </film>
+        <sampler type="independent">
+			<integer name="sample_count" value="$spp"/>
+        </sampler>
+    </sensor>
+
+    <include filename="cornel.xml"/>
+
+    <!-- Materials -->
+    <!-- MMAPs BSDF (Custom BSDF) -->
+    <bsdf type="mmapsbsdf" id="MMAPsBSDF"/> 
+    <!-- Glass material for Cube -->
+    <bsdf type="dielectric" id="ObjGlass">
+        <float name="int_ior" value="1.49"/>
+    </bsdf>
+    <!-- Lambert BSDF for debug -->
+    <bsdf type="twosided" id="RedLambert">
+        <bsdf type="diffuse">
+            <rgb name="reflectance" value="0.8, 0.05, 0.05"/>
+        </bsdf>
+    </bsdf>
+    <bsdf type="twosided" id="GreenLambert">
+        <bsdf type="diffuse">
+            <rgb name="reflectance" value="0.05, 0.8, 0.05"/>
+        </bsdf>
+    </bsdf>
+    <bsdf type="twosided" id="BlurLambert">
+        <bsdf type="diffuse">
+            <rgb name="reflectance" value="0.05, 0.05, 0.8"/>
+        </bsdf>
+    </bsdf>
+
+    <emitter type="constant">
+        <rgb name="radiance" value="0.5, 0.5, 0.5"/>
+    </emitter>
+
+    <!-- Textured light source -->
+    <shape type="obj" id="textured_lightsource">
+        <string name="filename" value="meshes/simple_plane.obj"/>
+        <transform name="to_world">
+            <scale value="2.5"/>
+            <rotate x="1" angle="180"/>
+            <translate value="0.0, -15, 0.0"/>
+        </transform>
+        <emitter type="area">
+            <texture name="radiance" type="bitmap">
+                <string name="filename" value="../img/cube04/invert.png"/>
+            </texture>
+        </emitter>
+    </shape>
+
+    <shape type="rectangle">
+        <transform name="to_world">
+            <scale value="25"/>
+            <rotate x="1" angle="-45"/>
+        </transform>
+        <ref id="MMAPsBSDF"/>
+    </shape>
+
+
+    <!-- <shape type="obj">
+        <string name="filename" value="meshes/bunny.obj"/>
+        <transform name="to_world">
+            <scale value="70"/>
+            <translate value="0, -5, 40"/>
+        </transform>
+        <ref id="ObjGlass"/>
+    </shape> -->
+
+    <!-- <shape type="obj">
+        <string name="filename" value="meshes/3Dprint/teapot_body_3dprint.obj"/>
+        <transform name="to_world">
+            <scale value="1"/>
+            <translate value="0, -1, 40"/>
+        </transform>
+        <ref id="ObjGlass"/>
+    </shape> -->
+
+    <shape type="obj">
+        <string name="filename" value="meshes/cube.obj"/>
+        <transform name="to_world">
+            <scale value="2.5"/>
+            <rotate y="1" angle="15.8"/>
+            <translate value="0, 0, 15"/>
+        </transform>
+        <ref id="ObjGlass"/>
+    </shape>
+
+    <!-- <shape type="sphere">
+        <float name="radius" value="2.5"/>
+        <transform name="to_world">
+            <translate value="0, 0, 15"/>
+        </transform>
+        <ref id="ObjGlass"/>
+    </shape> -->
+</scene>
